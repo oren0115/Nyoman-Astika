@@ -173,7 +173,7 @@ export function AdminShell({ children, currentPath = "" }: AdminShellProps) {
 
   return (
     <ToastContext.Provider value={{ addToast }}>
-      <div className="flex h-screen overflow-hidden bg-[#0a0a0f] text-foreground">
+      <div className="flex h-screen overflow-hidden bg-background text-foreground">
         {/* Sidebar overlay */}
         {sidebarOpen && (
           <div

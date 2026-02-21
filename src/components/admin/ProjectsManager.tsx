@@ -25,7 +25,7 @@ const emptyForm: ProjectFormData = {
   github_url: "",
   live_url: "",
   featured: false,
-  status: "draft",
+  status: "published",
   seo_title: "",
   seo_description: "",
   order_index: "0",

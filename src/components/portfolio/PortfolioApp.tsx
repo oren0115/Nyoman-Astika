@@ -11,12 +11,10 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 
-// ─── Skeleton ─────────────────────────────────────────────────────────────────
 function Skeleton({ className = "" }: { className?: string }) {
   return <div className={`animate-pulse rounded bg-white/5 ${className}`} />;
 }
 
-// ─── Hero ─────────────────────────────────────────────────────────────────────
 function HeroSection({ settings }: { settings: SiteSettings }) {
   return (
     <section
@@ -108,7 +106,6 @@ function HeroSection({ settings }: { settings: SiteSettings }) {
   );
 }
 
-// ─── Skills ───────────────────────────────────────────────────────────────────
 function SkillsSection({ skills }: { skills: Skill[] }) {
   const grouped = React.useMemo(() => {
     const map: Record<string, Skill[]> = {};
@@ -170,7 +167,6 @@ function SkillsSection({ skills }: { skills: Skill[] }) {
   );
 }
 
-// ─── Projects ─────────────────────────────────────────────────────────────────
 function ProjectsSection({ projects }: { projects: Project[] }) {
   return (
     <section
@@ -227,12 +223,12 @@ function ProjectsSection({ projects }: { projects: Project[] }) {
                   {project.short_description || project.description}
                 </p>
                 <div className="mb-4 flex flex-wrap gap-2">
-                  {project.tech_stack.map((tag) => (
+                  {(Array.isArray(project.tech_stack) ? project.tech_stack : []).map((tag) => (
                     <span
-                      key={tag}
+                      key={String(tag)}
                       className="rounded-md bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary ring-1 ring-primary/20"
                     >
-                      {tag}
+                      {String(tag)}
                     </span>
                   ))}
                 </div>
@@ -273,7 +269,6 @@ function ProjectsSection({ projects }: { projects: Project[] }) {
   );
 }
 
-// ─── Experience ────────────────────────────────────────────────────────────────
 function ExperienceSection({ experiences }: { experiences: Experience[] }) {
   return (
     <section
@@ -323,7 +318,6 @@ function ExperienceSection({ experiences }: { experiences: Experience[] }) {
   );
 }
 
-// ─── Testimonials ─────────────────────────────────────────────────────────────
 function TestimonialsSection({ testimonials }: { testimonials: Testimonial[] }) {
   if (!testimonials.length) return null;
 
@@ -389,7 +383,6 @@ function TestimonialsSection({ testimonials }: { testimonials: Testimonial[] }) 
   );
 }
 
-// ─── Contact ──────────────────────────────────────────────────────────────────
 function ContactSection({ settings }: { settings: SiteSettings }) {
   const [form, setForm] = React.useState({ name: "", email: "", message: "" });
   const [status, setStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle");
@@ -561,7 +554,6 @@ function ContactSection({ settings }: { settings: SiteSettings }) {
   );
 }
 
-// ─── Main App ─────────────────────────────────────────────────────────────────
 export function PortfolioApp() {
   const [loading, setLoading] = React.useState(true);
   const [data, setData] = React.useState<{
@@ -589,12 +581,21 @@ export function PortfolioApp() {
           publicApi.getTestimonials(),
         ]);
 
+        if (projectsRes.status === "rejected") {
+          console.error("[Portfolio] Projects fetch failed:", projectsRes.reason);
+        } else if (projectsRes.value?.success === false) {
+          console.warn("[Portfolio] Projects API error:", projectsRes.value.message);
+        }
+
+        const rawProjects = projectsRes.status === "fulfilled" ? projectsRes.value?.data : undefined;
+        const projectsList = Array.isArray(rawProjects) ? rawProjects : [];
+
         setData({
-          settings: settingsRes.status === "fulfilled" ? (settingsRes.value.data || {}) : {},
-          projects: projectsRes.status === "fulfilled" ? (projectsRes.value.data || []) : [],
-          skills: skillsRes.status === "fulfilled" ? (skillsRes.value.data || []) : [],
-          experiences: expRes.status === "fulfilled" ? (expRes.value.data || []) : [],
-          testimonials: testiRes.status === "fulfilled" ? (testiRes.value.data || []) : [],
+          settings: settingsRes.status === "fulfilled" ? (settingsRes.value?.data || {}) : {},
+          projects: projectsList,
+          skills: skillsRes.status === "fulfilled" ? (skillsRes.value?.data || []) : [],
+          experiences: expRes.status === "fulfilled" ? (expRes.value?.data || []) : [],
+          testimonials: testiRes.status === "fulfilled" ? (testiRes.value?.data || []) : [],
         });
       } finally {
         setLoading(false);
@@ -618,7 +619,7 @@ export function PortfolioApp() {
     <>
       <HeroSection settings={data.settings} />
 
-      {/* About section is static in Astro for SSG — dynamic data injected below */}
+      {/* About section is static in Astro for SSG — dynamic data injected below */}  
 
       {data.skills.length > 0 && <SkillsSection skills={data.skills} />}
 

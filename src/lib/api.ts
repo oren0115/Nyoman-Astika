@@ -131,8 +131,17 @@ async function apiFetch<T>(
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
   const response = await fetch(url, { ...options, headers });
-  const data = await response.json();
-  return data as ApiResponse<T>;
+  let data: ApiResponse<T>;
+  try {
+    const text = await response.text();
+    data = text ? (JSON.parse(text) as ApiResponse<T>) : { success: false, message: "Empty response" };
+  } catch {
+    data = { success: false, message: `Request failed${response.ok ? "" : ` ${response.status}`}` };
+  }
+  if (!response.ok && data.success !== false) {
+    data = { success: false, message: (data as { message?: string }).message || `HTTP ${response.status}` };
+  }
+  return data;
 }
 
 // Public API
