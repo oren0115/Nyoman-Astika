@@ -101,8 +101,7 @@ import "@/styles/global.css";
     </div>
 
     <script>
-      const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:4000';
-
+      import { API_BASE } from "@/lib/env";
       // Redirect if already logged in
       if (localStorage.getItem('admin_token')) {
         window.location.href = '/admin';
