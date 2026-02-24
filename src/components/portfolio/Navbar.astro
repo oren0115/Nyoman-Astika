@@ -1,7 +1,6 @@
 ---
 const navLinks = [
   { href: "#home", label: "Home" },
-  { href: "#about", label: "About" },
   { href: "#skills", label: "Skills" },
   { href: "#projects", label: "Projects" },
   { href: "#experience", label: "Experience" },
@@ -17,8 +16,9 @@ const navLinks = [
 >
   <nav class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 md:px-6">
     <a href="#home" class="flex items-center gap-2 font-bold text-foreground transition-opacity hover:opacity-90">
-      <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-xs font-extrabold text-primary-foreground shadow-lg shadow-primary/30">
-        NA
+      <span id="navbar-logo-wrap" class="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-primary shadow-lg shadow-primary/30 ring-2 ring-primary/20">
+        <img id="navbar-logo-img" src="" alt="" class="hidden h-full w-full object-cover" />
+        <span id="navbar-logo-initial" class="text-xs font-extrabold text-primary-foreground">NA</span>
       </span>
       <span class="hidden sm:inline text-foreground">Portfolio</span>
     </a>
@@ -92,7 +92,7 @@ const navLinks = [
         <button
           type="button"
           id="theme-toggle-mobile"
-          class="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-card/50 text-foreground"
+          class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-border bg-card/50 text-foreground"
           aria-label="Toggle light/dark mode"
         >
           <svg id="theme-icon-sun-mobile" class="hidden h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -113,98 +113,129 @@ const navLinks = [
 </header>
 
 <script>
-  const navbar = document.getElementById('navbar')!;
-  const mobileMenuBtn = document.getElementById('mobile-menu-btn')!;
-  const mobileMenu = document.getElementById('mobile-menu')!;
-  const menuIcon = document.getElementById('menu-icon')!;
-  const closeIcon = document.getElementById('close-icon')!;
-  const themeToggle = document.getElementById('theme-toggle')!;
-  const themeIconSun = document.getElementById('theme-icon-sun')!;
-  const themeIconMoon = document.getElementById('theme-icon-moon')!;
-  const themeToggleMobile = document.getElementById('theme-toggle-mobile')!;
-  const themeIconSunMobile = document.getElementById('theme-icon-sun-mobile')!;
-  const themeIconMoonMobile = document.getElementById('theme-icon-moon-mobile')!;
+  import { fetchPublicProfile, getImageUrl } from "@/lib/api";
 
-  function isDark() {
-    return document.documentElement.classList.contains('dark');
-  }
-
-  function updateThemeIcons() {
-    const dark = isDark();
-    themeIconSun.classList.toggle('hidden', !dark);
-    themeIconMoon.classList.toggle('hidden', dark);
-    themeIconSunMobile.classList.toggle('hidden', !dark);
-    themeIconMoonMobile.classList.toggle('hidden', dark);
-    themeToggle.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
-    themeToggleMobile.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
-  }
-
-  function toggleTheme() {
-    const dark = !isDark();
-    document.documentElement.classList.toggle('dark', dark);
-    try {
-      localStorage.setItem('theme', dark ? 'dark' : 'light');
-    } catch (e) {}
-    updateThemeIcons();
-  }
-
-  updateThemeIcons();
-  themeToggle.addEventListener('click', toggleTheme);
-  themeToggleMobile.addEventListener('click', toggleTheme);
-
-  function updateNavbarScroll() {
-    if (window.scrollY > 20) {
-      navbar.classList.add('glass', 'border-b', 'border-border', 'shadow-lg', 'shadow-black/20');
-    } else {
-      navbar.classList.remove('glass', 'border-b', 'border-border', 'shadow-lg', 'shadow-black/20');
-    }
-  }
-
-  // Active section highlight
-  const sections = document.querySelectorAll('section[id]');
-  const navLinks = document.querySelectorAll('.nav-link');
-
-  const sectionObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          navLinks.forEach((link) => {
-            const href = link.getAttribute('href');
-            if (href === `#${entry.target.id}`) {
-              link.classList.add('text-foreground');
-              link.classList.remove('text-muted-foreground');
-            } else {
-              link.classList.remove('text-foreground');
-              link.classList.add('text-muted-foreground');
-            }
-          });
-        }
-      });
-    },
-    { rootMargin: '-40% 0px -50% 0px', threshold: 0 }
-  );
-
-  sections.forEach((section) => sectionObserver.observe(section));
-
-  function toggleMobileMenu() {
-    const isOpen = !mobileMenu.classList.contains('hidden');
-    mobileMenu.classList.toggle('hidden', isOpen);
-    menuIcon.classList.toggle('hidden', !isOpen);
-    closeIcon.classList.toggle('hidden', isOpen);
-    mobileMenuBtn.setAttribute('aria-expanded', String(!isOpen));
-    mobileMenuBtn.setAttribute('aria-label', isOpen ? 'Open menu' : 'Close menu');
-  }
-
-  window.addEventListener('scroll', updateNavbarScroll, { passive: true });
-  updateNavbarScroll();
-
-  mobileMenuBtn.addEventListener('click', toggleMobileMenu);
-  mobileMenu.querySelectorAll('a').forEach((link) => {
-    link.addEventListener('click', () => {
-      mobileMenu.classList.add('hidden');
-      menuIcon.classList.remove('hidden');
-      closeIcon.classList.add('hidden');
-      mobileMenuBtn.setAttribute('aria-expanded', 'false');
+  function loadNavbarLogo() {
+    fetchPublicProfile().then((profile) => {
+      if (!profile?.avatar_url) return;
+      const img = document.getElementById("navbar-logo-img");
+      const initial = document.getElementById("navbar-logo-initial");
+      if (img && initial && img instanceof HTMLImageElement) {
+        img.src = getImageUrl(profile.avatar_url);
+        img.alt = profile.name ? `${profile.name} profile` : "Profile";
+        img.classList.remove("hidden");
+        initial.classList.add("hidden");
+      }
     });
-  });
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", loadNavbarLogo);
+  } else {
+    loadNavbarLogo();
+  }
+
+  const navbar = document.getElementById("navbar");
+  const mobileMenuBtn = document.getElementById("mobile-menu-btn");
+  const mobileMenu = document.getElementById("mobile-menu");
+  const menuIcon = document.getElementById("menu-icon");
+  const closeIcon = document.getElementById("close-icon");
+  const themeToggle = document.getElementById("theme-toggle");
+  const themeIconSun = document.getElementById("theme-icon-sun");
+  const themeIconMoon = document.getElementById("theme-icon-moon");
+  const themeToggleMobile = document.getElementById("theme-toggle-mobile");
+  const themeIconSunMobile = document.getElementById("theme-icon-sun-mobile");
+  const themeIconMoonMobile = document.getElementById("theme-icon-moon-mobile");
+
+  if (navbar && mobileMenuBtn && mobileMenu && menuIcon && closeIcon && themeToggle && themeIconSun && themeIconMoon && themeToggleMobile && themeIconSunMobile && themeIconMoonMobile) {
+    const nav = navbar as HTMLElement;
+    const menuBtn = mobileMenuBtn as HTMLElement;
+    const menu = mobileMenu as HTMLElement;
+    const mIcon = menuIcon as HTMLElement;
+    const cIcon = closeIcon as HTMLElement;
+    const tToggle = themeToggle as HTMLElement;
+    const tSun = themeIconSun as HTMLElement;
+    const tMoon = themeIconMoon as HTMLElement;
+    const tToggleM = themeToggleMobile as HTMLElement;
+    const tSunM = themeIconSunMobile as HTMLElement;
+    const tMoonM = themeIconMoonMobile as HTMLElement;
+
+    function isDark() {
+      return document.documentElement.classList.contains("dark");
+    }
+
+    function updateThemeIcons() {
+      const dark = isDark();
+      tSun.classList.toggle("hidden", !dark);
+      tMoon.classList.toggle("hidden", dark);
+      tSunM.classList.toggle("hidden", !dark);
+      tMoonM.classList.toggle("hidden", dark);
+      tToggle.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
+      tToggleM.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
+    }
+
+    function toggleTheme() {
+      const dark = !isDark();
+      document.documentElement.classList.toggle("dark", dark);
+      try {
+        localStorage.setItem("theme", dark ? "dark" : "light");
+      } catch (_e) {}
+      updateThemeIcons();
+    }
+
+    updateThemeIcons();
+    tToggle.addEventListener("click", toggleTheme);
+    tToggleM.addEventListener("click", toggleTheme);
+
+    function updateNavbarScroll() {
+      if (window.scrollY > 20) {
+        nav.classList.add("glass", "border-b", "border-border", "shadow-lg", "shadow-black/20");
+      } else {
+        nav.classList.remove("glass", "border-b", "border-border", "shadow-lg", "shadow-black/20");
+      }
+    }
+
+    const sections = document.querySelectorAll("section[id]");
+    const navLinksEls = document.querySelectorAll(".nav-link");
+    const sectionObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            navLinksEls.forEach((link) => {
+              const href = link.getAttribute("href");
+              if (href === `#${(entry.target as Element).id}`) {
+                link.classList.add("text-foreground");
+                link.classList.remove("text-muted-foreground");
+              } else {
+                link.classList.remove("text-foreground");
+                link.classList.add("text-muted-foreground");
+              }
+            });
+          }
+        });
+      },
+      { rootMargin: "-40% 0px -50% 0px", threshold: 0 }
+    );
+    sections.forEach((section) => sectionObserver.observe(section));
+
+    function toggleMobileMenu() {
+      const isOpen = !menu.classList.contains("hidden");
+      menu.classList.toggle("hidden", isOpen);
+      mIcon.classList.toggle("hidden", !isOpen);
+      cIcon.classList.toggle("hidden", isOpen);
+      menuBtn.setAttribute("aria-expanded", String(!isOpen));
+      menuBtn.setAttribute("aria-label", isOpen ? "Open menu" : "Close menu");
+    }
+
+    window.addEventListener("scroll", updateNavbarScroll, { passive: true });
+    updateNavbarScroll();
+    menuBtn.addEventListener("click", toggleMobileMenu);
+    menu.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", () => {
+        menu.classList.add("hidden");
+        mIcon.classList.remove("hidden");
+        cIcon.classList.add("hidden");
+        menuBtn.setAttribute("aria-expanded", "false");
+      });
+    });
+  }
 </script>
