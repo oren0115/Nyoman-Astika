@@ -45,6 +45,13 @@ export function SettingsManager() {
       const res = await adminApi.updateProfile(fd);
       if (res.success) {
         addToast("success", "Profile updated!");
+        if (res.data) {
+          const u = res.data as AdminUser;
+          setUser(u);
+          setProfileForm({ name: u.name || "", email: u.email || "", bio: u.bio || "" });
+          setAvatarPreview(u.avatar_url ? getImageUrl(u.avatar_url) : "");
+          setAvatarFile(null);
+        }
       } else {
         addToast("error", res.message || "Failed to update profile");
       }
@@ -157,7 +164,11 @@ export function SettingsManager() {
                 <input type="file" accept="image/*" className="hidden"
                   onChange={(e) => {
                     const f = e.target.files?.[0];
-                    if (f) { setAvatarFile(f); setAvatarPreview(URL.createObjectURL(f)); }
+                    if (f) {
+                      if (avatarPreview && avatarPreview.startsWith("blob:")) URL.revokeObjectURL(avatarPreview);
+                      setAvatarFile(f);
+                      setAvatarPreview(URL.createObjectURL(f));
+                    }
                   }} />
               </label>
             </div>
