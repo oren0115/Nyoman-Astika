@@ -4,6 +4,7 @@ export interface ApiResponse<T> {
   success: boolean;
   data?: T;
   message?: string;
+  errors?: Array<{ msg?: string; message?: string }>;
   meta?: { total: number; page: number; limit: number; totalPages: number };
 }
 
@@ -70,10 +71,12 @@ export interface SeoSettings {
 }
 
 export interface SiteSettings {
+  hero_badge?: string;
   hero_title?: string;
   hero_subtitle?: string;
   hero_cta_primary?: string;
   hero_cta_secondary?: string;
+  hero_image_url?: string;
   about_bio?: string;
   about_years?: string;
   about_projects?: string;
@@ -238,7 +241,9 @@ export const adminApi = {
   // Settings
   getSettings: () => apiFetch<SiteSettings>("/api/settings"),
   updateSettings: (data: SiteSettings) =>
-    apiFetch("/api/settings", { method: "PATCH", body: JSON.stringify(data) }),
+    apiFetch<SiteSettings>("/api/settings", { method: "PATCH", body: JSON.stringify(data) }),
+  updateSettingsFormData: (fd: FormData) =>
+    apiFetch<SiteSettings>("/api/settings", { method: "PATCH", body: fd }),
 
   // Profile
   updateProfile: (data: FormData) =>
@@ -258,10 +263,11 @@ export function getImageUrl(path: string | null | undefined): string {
   return `${API_BASE}${path}`;
 }
 
-/** Public profile (name, avatar) for navbar/header — no auth. */
+/** Public profile (name, avatar, cv) for navbar/header and Hero — no auth. */
 export interface PublicProfile {
   name: string;
   avatar_url: string | null;
+  cv_url: string | null;
 }
 
 export async function fetchPublicProfile(): Promise<PublicProfile | null> {
