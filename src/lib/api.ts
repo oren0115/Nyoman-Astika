@@ -59,6 +59,16 @@ export interface Testimonial {
   is_active: boolean;
 }
 
+export interface Certificate {
+  id: number;
+  title: string;
+  issuer: string;
+  issue_date: string | null;
+  credential_url: string | null;
+  image_url: string | null;
+  order_index: number;
+}
+
 export interface SeoSettings {
   id: number;
   site_title: string;
@@ -160,6 +170,7 @@ export const publicApi = {
   getSkills: () => apiFetch<Skill[]>("/api/skills"),
   getExperiences: () => apiFetch<Experience[]>("/api/experience"),
   getTestimonials: () => apiFetch<Testimonial[]>("/api/testimonials"),
+  getCertificates: () => apiFetch<Certificate[]>("/api/certificates"),
   getSeo: () => apiFetch<SeoSettings>("/api/seo"),
   getSettings: () => apiFetch<SiteSettings>("/api/settings"),
   getPublicProfile: () =>
@@ -220,6 +231,15 @@ export const adminApi = {
     apiFetch<Testimonial>(`/api/testimonials/${id}`, { method: "PATCH", body: data }),
   deleteTestimonial: (id: number) =>
     apiFetch(`/api/testimonials/${id}`, { method: "DELETE" }),
+
+  // Certificates
+  getCertificates: () => apiFetch<Certificate[]>("/api/certificates"),
+  createCertificate: (data: FormData) =>
+    apiFetch<Certificate>("/api/certificates", { method: "POST", body: data }),
+  updateCertificate: (id: number, data: FormData) =>
+    apiFetch<Certificate>(`/api/certificates/${id}`, { method: "PATCH", body: data }),
+  deleteCertificate: (id: number) =>
+    apiFetch(`/api/certificates/${id}`, { method: "DELETE" }),
 
   // Messages
   getMessages: (params?: { is_read?: boolean; page?: number }) => {
