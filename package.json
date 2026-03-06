@@ -12,6 +12,7 @@
     "@astrojs/mdx": "^4.3.13",
     "@astrojs/node": "^9.5.4",
     "@astrojs/react": "^4.4.2",
+    "@astrojs/vercel": "^8.0.0",
     "@tailwindcss/vite": "^4.1.18",
     "@types/canvas-confetti": "^1.9.0",
     "@types/react": "^19.2.14",
