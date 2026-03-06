@@ -156,7 +156,7 @@ async function apiFetch<T>(
   const token = typeof window !== "undefined" ? localStorage.getItem("admin_token") : null;
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
-  const response = await fetch(url, { ...options, headers });
+  const response = await fetch(url, { ...options, headers, cache: "no-store" });
   let data: ApiResponse<T>;
   try {
     const text = await response.text();
@@ -328,7 +328,7 @@ export interface PublicProfile {
 
 export async function fetchPublicProfile(): Promise<PublicProfile | null> {
   try {
-    const res = await fetch(`${API_BASE}/api/public-profile`).then((r) => r.json());
+    const res = await fetch(`${API_BASE}/api/public-profile`, { cache: "no-store" }).then((r) => r.json());
     return res?.success && res?.data ? (res.data as PublicProfile) : null;
   } catch {
     return null;
